@@ -52,6 +52,9 @@ embassy-executor = { version = "0.7.0", features = ["task-arena-size-20480"] }
 embassy-time     = { version = "0.4.0", features = ["generic-queue-8"] }
 esp-hal-embassy  = { version = "0.6.0", features = ["esp32c3"] }
 static_cell      = { version = "2.1.0", features = ["nightly"] }
+# TOOD: need to use but esp-hal doesn't expose??
+fugit                    = "0.3.7"
+onewire = { git = "https://github.com/kellerkindt/onewire" }
 
 [profile.dev]
 # Rust debug is too slow.

@@ -4,43 +4,109 @@
 use embassy_executor::Spawner;
 use embassy_time::{Duration, Timer};
 use esp_backtrace as _;
-use esp_hal::clock::CpuClock;
-use esp_hal::ledc::{
-    channel,
-    timer::{self, TimerIFace},
-    LSGlobalClkSource, Ledc, LowSpeed,
+use esp_hal::{
+    clock::CpuClock,
+    gpio::{Level, OutputOpenDrain, Pull},
+    ledc::{
+        channel::{self, ChannelIFace},
+        timer::{self, TimerIFace},
+        LSGlobalClkSource, Ledc, LowSpeed,
+    },
 };
 use log::info;
+use onewire::{ds18b20, DeviceSearch, OneWire, DS18B20};
+use static_cell::StaticCell;
 
 extern crate alloc;
 
 // DS18b20
 
 #[embassy_executor::task]
-async fn run() {
+async fn cathode_control_task(pwm_channel: &'static channel::Channel<'static, LowSpeed>) {
     loop {
-        esp_println::println!("Hello world from embassy using esp-hal-async!");
-        Timer::after(Duration::from_millis(1_000)).await;
+        for duty in 0..=100 {
+            //info!("Setting duty cycle to {}%", duty);
+            pwm_channel.set_duty(duty).unwrap();
+            Timer::after(Duration::from_millis(10)).await;
+        }
+        for duty in (0..=100).rev() {
+            //info!("Setting duty cycle to {}%", duty);
+            pwm_channel.set_duty(duty).unwrap();
+            Timer::after(Duration::from_millis(10)).await;
+        }
     }
 }
 
-// loop {
-//     // Set up a breathing LED: fade from off to on over a second, then
-//     // from on back off over the next second.  Then loop.
-//     channel0.start_duty_fade(0, 100, 1000)?;
-//     while channel0.is_duty_fade_running() {}
-//     channel0.start_duty_fade(100, 0, 1000)?;
-//     while channel0.is_duty_fade_running() {}
-// }
+#[embassy_executor::task]
+async fn temperature_task(mut onewire_pin: OutputOpenDrain<'static>) {
+    let mut onewire = OneWire::new(&mut onewire_pin, false);
+    let mut delay = embassy_time::Delay;
+    loop {
+        let mut search = DeviceSearch::new();
+        if let Some(device) = match onewire.search_next(&mut search, &mut delay) {
+            Ok(device) => device,
+            Err(e) => {
+                info!("Error searching for device: {:?}", e);
+                None
+            }
+        } {
+            match device.address[0] {
+                ds18b20::FAMILY_CODE => {
+                    let ds18b20 = match DS18B20::new(device) {
+                        Ok(sensor) => sensor,
+                        Err(e) => {
+                            info!("Error initializing DS18B20: {:?}", e);
+                            continue;
+                        }
+                    };
+                    loop {
+                        let resolution = match ds18b20.measure_temperature(&mut onewire, &mut delay)
+                        {
+                            Ok(res) => res,
+                            Err(e) => {
+                                info!("Error measuring temperature: {:?}", e);
+                                break;
+                            }
+                        };
+                        Timer::after(Duration::from_millis(resolution.time_ms() as u64)).await;
+                        let raw_temperature =
+                            match ds18b20.read_temperature(&mut onewire, &mut delay) {
+                                Ok(temperature) => temperature,
+                                Err(e) => {
+                                    info!("Error reading temperature: {:?}", e);
+                                    break;
+                                }
+                            };
+
+                        // Process and log the temperature
+                        let (integer, fraction) = onewire::ds18b20::split_temp(raw_temperature);
+                        let temperature_c = (integer as f32) + (fraction as f32) / 10000.0;
+                        let temperature_f = temperature_c * 9.0 / 5.0 + 32.0;
+                        info!(
+                            "Current temperature: {:.2}°C ({:.2}°F)",
+                            temperature_c, temperature_f
+                        );
+
+                        Timer::after(Duration::from_secs(5)).await;
+                    }
+                }
+                _ => {
+                    info!("Unknown device type");
+                }
+            }
+        } else {
+            info!("No sensor found, retrying in 5 seconds...");
+            Timer::after(Duration::from_secs(5)).await;
+        }
+    }
+}
 
 #[esp_hal_embassy::main]
 async fn main(spawner: Spawner) {
-    // let peripherals = esp_hal::init(esp_hal::Config::default());
     let config = esp_hal::Config::default().with_cpu_clock(CpuClock::max());
     let peripherals = esp_hal::init(config);
 
     esp_alloc::heap_allocator!(72 * 1024);
-
     esp_println::logger::init_logger_from_env();
 
     let timer0 = esp_hal::timer::systimer::SystemTimer::new(peripherals.SYSTIMER);
@@ -48,39 +114,47 @@ async fn main(spawner: Spawner) {
 
     info!("Embassy initialized!");
 
-    let timer1 = esp_hal::timer::timg::TimerGroup::new(peripherals.TIMG0);
-    let _init = esp_wifi::init(
-        timer1.timer0,
-        esp_hal::rng::Rng::new(peripherals.RNG),
-        peripherals.RADIO_CLK,
-    )
-    .unwrap();
+    // let timer1 = esp_hal::timer::timg::TimerGroup::new(peripherals.TIMG0);
+    // let _init = esp_wifi::init(
+    //     timer1.timer0,
+    //     esp_hal::rng::Rng::new(peripherals.RNG),
+    //     peripherals.RADIO_CLK,
+    // )
+    // .unwrap();
 
     let mut ledc = Ledc::new(peripherals.LEDC);
     ledc.set_global_slow_clock(LSGlobalClkSource::APBClk);
 
-    let mut lstimer0 = ledc.timer::<LowSpeed>(timer::Number::Timer0);
-    lstimer0.configure(timer::config::Config {
-        duty: timer::config::Duty::Duty5Bit,
-        clock_source: timer::LSClockSource::APBClk,
-        frequency: Rate::from_khz(24),
-    })?;
+    let mut lstimer = ledc.timer::<LowSpeed>(timer::Number::Timer0);
+    lstimer
+        .configure(timer::config::Config {
+            duty: timer::config::Duty::Duty5Bit,
+            clock_source: timer::LSClockSource::APBClk,
+            frequency: fugit::HertzU32::Hz(24_000),
+        })
+        .unwrap();
+    static LSTIMER: StaticCell<timer::Timer<LowSpeed>> = StaticCell::new();
+    let lstimer = &*LSTIMER.init(lstimer);
 
-    let led = peripherals.GPIO2;
-    let mut channel0 = ledc.channel(channel::Number::Channel0, led);
-    // channel0.configure(channel::config::Config {
-    //     timer: &lstimer0,
-    //     duty_pct: 10,
-    //     pin_config: channel::config::PinConfig::PushPull,
-    // })?;
+    let pwm_pin = peripherals.GPIO2;
+    let mut pwm_channel = ledc.channel::<LowSpeed>(channel::Number::Channel0, pwm_pin);
+    pwm_channel
+        .configure(channel::config::Config {
+            timer: lstimer,
+            duty_pct: 0,
+            pin_config: channel::config::PinConfig::PushPull,
+        })
+        .unwrap();
+    static PWM_CHANNEL: StaticCell<channel::Channel<LowSpeed>> = StaticCell::new();
+    let pwm_channel = &*PWM_CHANNEL.init(pwm_channel);
 
-    // TODO: Spawn some tasks
-    let _ = spawner;
+    spawner.spawn(cathode_control_task(pwm_channel)).unwrap();
+
+    let onewire_pin = OutputOpenDrain::new(peripherals.GPIO1, Level::Low, Pull::Down);
+    spawner.spawn(temperature_task(onewire_pin)).unwrap();
 
     loop {
-        info!("Hello world!");
-        Timer::after(Duration::from_secs(1)).await;
+        info!("Still alive!");
+        Timer::after(Duration::from_secs(30)).await;
     }
-
-    // for inspiration have a look at the examples at https://github.com/esp-rs/esp-hal/tree/v0.23.1/examples/src/bin
 }
