@@ -1,6 +1,7 @@
 #![no_std]
 #![no_main]
 
+use core::sync::atomic::{AtomicU32, Ordering};
 use embassy_executor::Spawner;
 use embassy_time::{Duration, Timer};
 use esp_backtrace as _;
@@ -21,19 +22,25 @@ extern crate alloc;
 
 // DS18b20
 
+static TEMPERATURE_F: AtomicU32 = AtomicU32::new(0);
+
 #[embassy_executor::task]
 async fn cathode_control_task(pwm_channel: &'static channel::Channel<'static, LowSpeed>) {
     loop {
-        for duty in 0..=100 {
-            //info!("Setting duty cycle to {}%", duty);
-            pwm_channel.set_duty(duty).unwrap();
-            Timer::after(Duration::from_millis(10)).await;
-        }
-        for duty in (0..=100).rev() {
-            //info!("Setting duty cycle to {}%", duty);
-            pwm_channel.set_duty(duty).unwrap();
-            Timer::after(Duration::from_millis(10)).await;
-        }
+        const PWM_MAX: u8 = 40;
+
+        let temperature_f = TEMPERATURE_F.load(Ordering::Relaxed) as f32 / 100.0;
+        let duty = if temperature_f <= 60.0 {
+            0
+        } else if temperature_f >= 90.0 {
+            PWM_MAX
+        } else {
+            ((temperature_f - 60.0) / 30.0 * PWM_MAX as f32) as u8
+        };
+        let duty_percent = (duty as f32 / PWM_MAX as f32) * 100.0;
+        info!("Setting duty cycle to {}% ({}%)", duty, duty_percent);
+        pwm_channel.set_duty(duty).unwrap();
+        Timer::after(Duration::from_secs(10)).await;
     }
 }
 
@@ -86,6 +93,7 @@ async fn temperature_task(mut onewire_pin: OutputOpenDrain<'static>) {
                             "Current temperature: {:.2}°C ({:.2}°F)",
                             temperature_c, temperature_f
                         );
+                        TEMPERATURE_F.store((temperature_f * 100.0) as u32, Ordering::Relaxed);
 
                         Timer::after(Duration::from_secs(5)).await;
                     }
