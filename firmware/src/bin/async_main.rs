@@ -177,9 +177,9 @@ async fn main(spawner: Spawner) {
     let config = esp_hal::Config::default().with_cpu_clock(CpuClock::max());
     let peripherals = esp_hal::init(config);
 
-    let hv_enable_pin = peripherals.GPIO0;
-    let pwm_pin = peripherals.GPIO1;
-    let onewire_pin = peripherals.GPIO2;
+    let hv_enable_pin = peripherals.GPIO3;
+    let pwm_pin = peripherals.GPIO0;
+    let onewire_pin = peripherals.GPIO4;
 
     esp_alloc::heap_allocator!(72 * 1024);
     esp_println::logger::init_logger_from_env();
