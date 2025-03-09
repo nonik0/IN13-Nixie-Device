@@ -1,4 +1,4 @@
 (fp_lib_table
   (version 7)
-  (lib (name "Xiao")(type "KiCad")(uri "G:/misc/OPL_Kicad_Library/Seeed Studio XIAO Series Library")(options "")(descr ""))
+  (lib (name "IN13-Device")(type "KiCad")(uri "${KIPRJMOD}/IN13-Device.pretty")(options "")(descr ""))
 )

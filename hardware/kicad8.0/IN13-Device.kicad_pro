@@ -235,8 +235,12 @@
     }
   },
   "libraries": {
-    "pinned_footprint_libs": [],
-    "pinned_symbol_libs": []
+    "pinned_footprint_libs": [
+      "IN13-Device"
+    ],
+    "pinned_symbol_libs": [
+      "IN13-Device"
+    ]
   },
   "meta": {
     "filename": "IN13-Device.kicad_pro",
