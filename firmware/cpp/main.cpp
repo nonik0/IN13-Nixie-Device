@@ -2,8 +2,6 @@
 #include "temperature_sensor_task.h"
 #include "wifi_services.h"
 
-// TODO: turn off PWM/HV before OTA starts
-
 CathodeControlTaskHandler cathodeControl;
 TemperatureSensorTaskHandler temperatureSensor;
 WifiServices wifiServices;

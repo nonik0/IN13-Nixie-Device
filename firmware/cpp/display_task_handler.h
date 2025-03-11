@@ -19,6 +19,12 @@ public:
 
     virtual void setMessage(const char *message) { strncpy(_message, message, MaxMessageSize); }
 
+    template <typename... Args>
+    void setMessage(const char *format, Args... args)
+    {
+        snprintf(_message, MaxMessageSize, format, args...);
+    }
+
     bool suspendTask()
     {
         if (_taskHandle != NULL)

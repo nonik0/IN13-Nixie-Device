@@ -15,6 +15,9 @@ using GetDataCallback = std::function<T()>;
 using SetDisplayCallback = std::function<void(bool)>;
 using SetMessageCallback = std::function<const char *(const char *)>;
 
+// hacky but quick way to just get OTA to turn off PWM/HV during OTA
+extern CathodeControlTaskHandler cathodeControl;
+
 class WifiServices
 {
 private:
@@ -28,6 +31,8 @@ private:
   unsigned long _lastStatusCheckMs = 0;
   bool _displayState = false;
   ArduinoOTAClass _ota;
+  bool _otaSavedDisplay = false;
+  int _otaSavedTargetPwm = -1;
   WebServer _restServer;
   vector<SetDisplayCallback> _setDisplayCallbacks;
 
@@ -181,29 +186,54 @@ void WifiServices::otaSetup()
 
   _ota
       .onStart([this]()
-               { log_i("Start updating %s", _ota.getCommand() == U_FLASH ? "sketch" : "filesystem"); })
-      .onEnd([]()
-             { log_i("\nEnd"); })
+               {
+                  log_i("Start updating %s", _ota.getCommand() == U_FLASH ? "sketch" : "filesystem");
+                  _otaSavedDisplay = cathodeControl.isHvEnabled();
+                  if (_otaSavedDisplay)
+                  {
+                    log_i("Disabling HV for OTA update");
+                    cathodeControl.setDisplay(false);
+                  }
+
+                  unsigned long startMs = millis();
+                  while (cathodeControl.isHvEnabled() && millis() - startMs < 10000)
+                  {
+                    log_i("Waiting for HV to disable...");
+                    delay(500);
+                  }
+
+                  if (cathodeControl.isHvEnabled())
+                  {
+                    log_w("HV too slow to disable for OTA, continuing anyway");
+                  } })
+      .onEnd([this]()
+             {
+                if (_otaSavedDisplay)
+                {
+                  log_i("Re-enabling HV after OTA update");
+                  cathodeControl.setDisplay(true);
+                }
+                log_i("\nEnd"); })
       .onProgress([](unsigned int progress, unsigned int total)
                   { log_i("Progress: %u%%\r", (progress / (total / 100))); })
       .onError([](ota_error_t error)
                {
-        switch(error) {
-          case OTA_AUTH_ERROR:
-            log_e("Error[%u]: Auth Failed", error);
-            break;
-          case OTA_BEGIN_ERROR:
-            log_e("Error[%u]: Begin Failed", error);
-            break;
-          case OTA_CONNECT_ERROR:
-            log_e("Error[%u]: Connect Failed", error);
-            break;
-          case OTA_RECEIVE_ERROR:
-            log_e("Error[%u]: Receive Failed", error);
-            break;
-          case OTA_END_ERROR:
-            log_e("Error[%u]: End Failed", error);
-            break;
+                  switch(error) {
+                    case OTA_AUTH_ERROR:
+                      log_e("Error[%u]: Auth Failed", error);
+                      break;
+                    case OTA_BEGIN_ERROR:
+                      log_e("Error[%u]: Begin Failed", error);
+                      break;
+                    case OTA_CONNECT_ERROR:
+                      log_e("Error[%u]: Connect Failed", error);
+                      break;
+                    case OTA_RECEIVE_ERROR:
+                      log_e("Error[%u]: Receive Failed", error);
+                      break;
+                    case OTA_END_ERROR:
+                      log_e("Error[%u]: End Failed", error);
+                      break;
         } });
 
   _ota.begin();
