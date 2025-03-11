@@ -188,13 +188,8 @@ void WifiServices::otaSetup()
       .onStart([this]()
                {
                   log_i("Start updating %s", _ota.getCommand() == U_FLASH ? "sketch" : "filesystem");
-                  _otaSavedDisplay = cathodeControl.isHvEnabled();
-                  if (_otaSavedDisplay)
-                  {
-                    log_i("Disabling HV for OTA update");
-                    cathodeControl.setDisplay(false);
-                  }
 
+                  cathodeControl.setDisplay(false);
                   unsigned long startMs = millis();
                   while (cathodeControl.isHvEnabled() && millis() - startMs < 10000)
                   {
@@ -206,14 +201,8 @@ void WifiServices::otaSetup()
                   {
                     log_w("HV too slow to disable for OTA, continuing anyway");
                   } })
-      .onEnd([this]()
-             {
-                if (_otaSavedDisplay)
-                {
-                  log_i("Re-enabling HV after OTA update");
-                  cathodeControl.setDisplay(true);
-                }
-                log_i("\nEnd"); })
+      .onEnd([]()
+             { log_i("\nEnd"); })
       .onProgress([](unsigned int progress, unsigned int total)
                   { log_i("Progress: %u%%\r", (progress / (total / 100))); })
       .onError([](ota_error_t error)

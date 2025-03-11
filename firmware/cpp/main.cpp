@@ -20,7 +20,7 @@ void setup()
   wifiServices.createTask();
 
   wifiServices.registerGetDataCallback<float>("/temperature", []() -> float
-                                       { return temperatureSensor.isSensorFound() ? temperatureSensor.getTemperature() : -1; });
+                                       { return temperatureSensor.isSensorFound() ? temperatureSensor.getTemperature() : -999; });
   wifiServices.registerSetDisplayCallback([&](bool state)
                                           { cathodeControl.setDisplay(state); });
   wifiServices.registerSetMessageCallback("/cathodeControl", [](const char *message)

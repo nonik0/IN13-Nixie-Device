@@ -6,7 +6,7 @@ class DisplayTaskHandler
 protected:
     static const int MaxMessageSize = 100;
 
-    bool _display = true;
+    volatile bool _display = true;
     char _message[MaxMessageSize];
     TaskHandle_t _taskHandle = NULL;
 
