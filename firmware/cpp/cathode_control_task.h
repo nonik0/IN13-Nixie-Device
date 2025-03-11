@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "display_task_handler.h"
@@ -10,15 +9,21 @@ class CathodeControlTaskHandler : public DisplayTaskHandler
 {
 private:
     static const uint8_t TASK_PRIORITY = 5;
-    const int DELAY_MS = 50;
-    const int TEMP_MIN = 60;
-    const int TEMP_MAX = 90;
-    const int PWM_RESOLUTION = 9;
-    const int PWM_MAX = static_cast<int>(0.42 * ((1 << PWM_RESOLUTION) - 1)); //  cathode fully lit at ~42%, limit current at this PWM value
-    const int PWM_DELAY_MS = 1;
-    const uint8_t HV_EN_PIN = 8;
-    const uint8_t PWM_PIN = 44;
+    static const int DELAY_MS = 50;
+    static const int DEFAULT_TEMP_MIN = 60;
+    static const int DEFAULT_TEMP_MAX = 90;
+    static const uint32_t DEFAULT_PWM_DELAY_MS = 1;
+    static const uint8_t DEFAULT_PWM_MAX_PERCENT = 42;
+    static const uint8_t PWM_RESOLUTION = 9;
+    static const uint8_t HV_EN_PIN = 8;
+    static const uint8_t PWM_PIN = 44;
 
+    // configurable tuning
+    int _tempMin;
+    int _tempMax;
+    int _pwmDelayMs;
+    int _pwmMax;
+    // current state
     bool _isAuto;
     bool _hvEnabled;
     int _curPwm;
@@ -32,7 +37,7 @@ public:
 
 private:
     void task(void *parameters) override;
-};;
+};
 
 bool CathodeControlTaskHandler::createTask()
 {
@@ -42,8 +47,14 @@ bool CathodeControlTaskHandler::createTask()
         return false;
     }
 
-    _isAuto = true;
     _display = false;
+
+    _tempMin = DEFAULT_TEMP_MIN;
+    _tempMax = DEFAULT_TEMP_MAX;
+    _pwmDelayMs = DEFAULT_PWM_DELAY_MS;
+    _pwmMax = (DEFAULT_PWM_MAX_PERCENT / 100.0) * ((1 << PWM_RESOLUTION) - 1);
+
+    _isAuto = true;
     _hvEnabled = false;
     _curPwm = 0;
     _targetPwm = -1;
@@ -78,6 +89,27 @@ void CathodeControlTaskHandler::setMessage(const char *message)
         setTargetPwm(constrain(value, 0x00, 0xFF));
         log_i("Manual mode, PWM: %d", _targetPwm);
     }
+    else if (strncmp(message, "automaxf|", 9) == 0)
+    {
+        _tempMax = atoi(message + 9);
+        log_i("Auto max temperature set to: %d", _tempMax);
+    }
+    else if (strncmp(message, "autominf|", 9) == 0)
+    {
+        _tempMin = atoi(message + 9);
+        log_i("Auto min temperature set to: %d", _tempMin);
+    }
+    else if (strncmp(message, "maxpwmpct|", 10) == 0)
+    {
+        float pct = atof(message + 10) / 100.0;
+        _pwmMax = static_cast<int>(pct * ((1 << PWM_RESOLUTION) - 1));
+        log_i("Max PWM percentage set to: %.2f%%", pct * 100);
+    }
+    else if (strncmp(message, "pwmdelayms|", 11) == 0)
+    {
+        _pwmDelayMs = atoi(message + 11);
+        log_i("PWM delay set to: %d ms", _pwmDelayMs);
+    }
     else
     {
         log_w("Invalid message: %s", message);
@@ -86,14 +118,31 @@ void CathodeControlTaskHandler::setMessage(const char *message)
 
 void CathodeControlTaskHandler::setTargetPwm(uint8_t value)
 {
-    // map value from 0-255 to 0-PWM_MAX
-    _targetPwm = map(value, 0x00, 0xFF, 0, PWM_MAX);
+    // map value from 0-255 to 0-_pwmMax
+    _targetPwm = map(value, 0x00, 0xFF, 0, _pwmMax);
 }
 
 void CathodeControlTaskHandler::task(void *parameters)
 {
     delay(2000); // wait for other tasks to start
     log_d("Starting CathodeControlTask");
+
+    log_i("Performing ramp up test for IN-13");
+    digitalWrite(HV_EN_PIN, true);
+    delay(DELAY_MS);
+    for (int i = 0; i <= _pwmMax; i++)
+    {
+        analogWrite(PWM_PIN, i);
+        delay(_pwmDelayMs);
+    }
+    for (int i = _pwmMax; i >= 0; i--)
+    {
+        analogWrite(PWM_PIN, i);
+        delay(_pwmDelayMs);
+    }
+    digitalWrite(HV_EN_PIN, false);
+    delay(DELAY_MS);
+    log_i("Ramp up test complete");
 
     while (1)
     {
@@ -119,7 +168,7 @@ void CathodeControlTaskHandler::task(void *parameters)
             else
             {
                 float temperature = temperatureSensor.getTemperature();
-                uint8_t newTargetPwm = map(temperature, TEMP_MIN, TEMP_MAX, 0, PWM_MAX);
+                uint8_t newTargetPwm = map(temperature, _tempMin, _tempMax, 0, _pwmMax);
                 if (newTargetPwm != _targetPwm)
                 {
                     _targetPwm = newTargetPwm;
@@ -147,8 +196,7 @@ void CathodeControlTaskHandler::task(void *parameters)
         }
 
         // ramp up/down PWM incrementally each cycle
-        _curPwm = _curPwm < _targetPwm ? _curPwm + 1 : _curPwm > _targetPwm ? _curPwm - 1
-                                                                            : _curPwm;
+        _curPwm = _curPwm < _targetPwm ? _curPwm + 1 : _curPwm > _targetPwm ? _curPwm - 1 : _curPwm;
 
         if (_curPwm != _targetPwm)
         {
@@ -156,6 +204,6 @@ void CathodeControlTaskHandler::task(void *parameters)
         }
 
         analogWrite(PWM_PIN, _curPwm);
-        delay(PWM_DELAY_MS);
+        delay(_pwmDelayMs);
     }
 }

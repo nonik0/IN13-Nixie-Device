@@ -2,8 +2,6 @@
 #include "temperature_sensor_task.h"
 #include "wifi_services.h"
 
-// TODO: be able to configre PWM_MAX, TEMP_MIN, TEMP_MAX, PWM_DELAY_MS for cathode control
-// TODO: rest endpoint for temperature
 // TODO: turn off PWM/HV before OTA starts
 
 CathodeControlTaskHandler cathodeControl;
@@ -23,9 +21,10 @@ void setup()
   temperatureSensor.createTask();
   wifiServices.createTask();
 
+  wifiServices.registerGetDataCallback<float>("/temperature", []() -> float
+                                       { return temperatureSensor.isSensorFound() ? temperatureSensor.getTemperature() : -1; });
   wifiServices.registerSetDisplayCallback([&](bool state)
                                           { cathodeControl.setDisplay(state); });
-
   wifiServices.registerSetMessageCallback("/cathodeControl", [](const char *message)
                                           { if (strlen(message) > 0)  cathodeControl.setMessage(message);
                                             return cathodeControl.getMessage(); });

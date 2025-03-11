@@ -10,6 +10,8 @@
 #include "secrets.h"
 
 using namespace std;
+template <typename T>
+using GetDataCallback = std::function<T()>;
 using SetDisplayCallback = std::function<void(bool)>;
 using SetMessageCallback = std::function<const char *(const char *)>;
 
@@ -32,6 +34,8 @@ private:
 public:
   void setup(const char *hostname);
   void createTask();
+  template <typename T>
+  void registerGetDataCallback(const char *endpoint, GetDataCallback<T> callback);
   void registerSetDisplayCallback(SetDisplayCallback callback);
   void registerSetMessageCallback(const char *endpoint, SetMessageCallback callback);
 
@@ -45,6 +49,8 @@ private:
   void restSetup();
 
   void restIndex();
+  template <typename T>
+  void restData(GetDataCallback<T> callback);
   void restDisplay();
   void restMessage(SetMessageCallback setMessage);
 };
@@ -86,6 +92,13 @@ void WifiServices::createTask()
       this,
       TaskPriority,
       NULL);
+}
+
+template <typename T>
+void WifiServices::registerGetDataCallback(const char *endpoint, GetDataCallback<T> callback)
+{
+  _restServer.on(endpoint, [this, callback]()
+                 { restData(callback); });
 }
 
 void WifiServices::registerSetDisplayCallback(SetDisplayCallback callback)
@@ -214,6 +227,13 @@ void WifiServices::restIndex()
   log_i("Serving index.html");
   _restServer.send(200, "text/plain", _hostname);
   log_i("Served index.html");
+}
+
+template <typename T>
+void WifiServices::restData(GetDataCallback<T> callback)
+{
+  T data = callback();
+  _restServer.send(200, "text/plain", String(data));
 }
 
 void WifiServices::restDisplay()
