@@ -1,10 +1,10 @@
 [package]
 edition = "2021"
-name    = "in13-device"
+name    = "in13-nixie-device"
 version = "0.1.0"
 
 [[bin]]
-name = "in13-device"
+name = "in13-nixie-device"
 path = "./src/bin/async_main.rs"
 
 [dependencies]

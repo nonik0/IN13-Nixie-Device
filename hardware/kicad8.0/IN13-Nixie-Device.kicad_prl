@@ -74,7 +74,7 @@
     "ssh_key": ""
   },
   "meta": {
-    "filename": "IN13-Device.kicad_prl",
+    "filename": "IN13-Nixie-Device.kicad_prl",
     "version": 3
   },
   "project": {

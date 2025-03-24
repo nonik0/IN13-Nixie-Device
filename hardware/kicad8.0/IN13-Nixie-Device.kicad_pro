@@ -236,14 +236,14 @@
   },
   "libraries": {
     "pinned_footprint_libs": [
-      "IN13-Device"
+      "IN13-Nixie-Device"
     ],
     "pinned_symbol_libs": [
-      "IN13-Device"
+      "IN13-Nixie-Device"
     ]
   },
   "meta": {
-    "filename": "IN13-Device.kicad_pro",
+    "filename": "IN13-Nixie-Device.kicad_pro",
     "version": 1
   },
   "net_settings": {
