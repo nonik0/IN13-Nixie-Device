@@ -280,9 +280,9 @@
 		)
 		(symbol "EE0504S_Transformer_1_1"
 			(pin passive line
-				(at -10.16 5.08 0)
+				(at -10.16 -5.08 0)
 				(length 7.62)
-				(name "AA"
+				(name "AB"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -298,16 +298,16 @@
 				)
 			)
 			(pin passive line
-				(at -10.16 -5.08 0)
+				(at -10.16 5.08 0)
 				(length 7.62)
-				(name "AB"
+				(name "AA"
 					(effects
 						(font
 							(size 1.27 1.27)
 						)
 					)
 				)
-				(number "2"
+				(number "4"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -325,7 +325,7 @@
 						)
 					)
 				)
-				(number "3"
+				(number "5"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -343,7 +343,7 @@
 						)
 					)
 				)
-				(number "4"
+				(number "6"
 					(effects
 						(font
 							(size 1.27 1.27)
