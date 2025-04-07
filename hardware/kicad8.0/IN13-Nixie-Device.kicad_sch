@@ -5398,6 +5398,16 @@
 	)
 	(wire
 		(pts
+			(xy 63.5 35.56) (xy 63.5 41.91)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "56bd686b-19cd-4617-8fca-b91d2dff4918")
+	)
+	(wire
+		(pts
 			(xy 153.67 116.84) (xy 160.02 116.84)
 		)
 		(stroke
@@ -5995,16 +6005,6 @@
 			(type default)
 		)
 		(uuid "dda1d548-dd2d-4368-a765-7ced413c1b50")
-	)
-	(wire
-		(pts
-			(xy 63.5 41.91) (xy 59.69 41.91)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e0b95330-6d5e-421a-9b77-a2be4283b842")
 	)
 	(wire
 		(pts
@@ -8740,6 +8740,71 @@
 		)
 	)
 	(symbol
+		(lib_id "power:+3.3V")
+		(at 45.72 26.67 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "332050c9-0910-45a2-b155-e678bf4caca7")
+		(property "Reference" "#PWR040"
+			(at 45.72 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "+3.3V"
+			(at 45.212 22.606 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 45.72 26.67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 45.72 26.67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+3.3V\""
+			(at 45.72 26.67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "02acf34f-e255-4256-8f77-a2939e568c52")
+		)
+		(instances
+			(project "IN13-Nixie-Device"
+				(path "/36cde5b7-6663-4cfe-a0a3-3f17918aab11"
+					(reference "#PWR040")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:GND")
 		(at 80.01 172.72 0)
 		(unit 1)
@@ -9344,6 +9409,71 @@
 			(project ""
 				(path "/36cde5b7-6663-4cfe-a0a3-3f17918aab11"
 					(reference "RV1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 45.72 34.29 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "4f5a17c0-4ed6-4e3f-a962-80f2d34c20f0")
+		(property "Reference" "#PWR039"
+			(at 45.72 40.64 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 45.72 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 45.72 34.29 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 45.72 34.29 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 45.72 34.29 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "9f429258-28a1-48c5-9086-7e1d0e58f9a7")
+		)
+		(instances
+			(project "IN13-Nixie-Device"
+				(path "/36cde5b7-6663-4cfe-a0a3-3f17918aab11"
+					(reference "#PWR039")
 					(unit 1)
 				)
 			)
@@ -11547,7 +11677,7 @@
 	)
 	(symbol
 		(lib_id "power:+3.3V")
-		(at 59.69 41.91 0)
+		(at 63.5 35.56 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -11555,7 +11685,7 @@
 		(dnp no)
 		(uuid "c460a7ec-7055-4af2-8ba7-1849ea3419a6")
 		(property "Reference" "#PWR017"
-			(at 59.69 45.72 0)
+			(at 63.5 39.37 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11564,7 +11694,7 @@
 			)
 		)
 		(property "Value" "+3.3V"
-			(at 59.182 37.846 0)
+			(at 62.992 31.496 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11572,7 +11702,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 59.69 41.91 0)
+			(at 63.5 35.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11581,7 +11711,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 59.69 41.91 0)
+			(at 63.5 35.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11590,7 +11720,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+3.3V\""
-			(at 59.69 41.91 0)
+			(at 63.5 35.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11743,6 +11873,75 @@
 			(project "IN13-Nixie-Device"
 				(path "/36cde5b7-6663-4cfe-a0a3-3f17918aab11"
 					(reference "#PWR01")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 45.72 30.48 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "c9171f91-39e5-4fbc-bc04-b5832f2e19c6")
+		(property "Reference" "C1"
+			(at 46.482 27.94 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "1u"
+			(at 46.228 32.766 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 46.6852 34.29 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 45.72 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 45.72 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "46072d63-8409-4301-88aa-bafb8e26c1be")
+		)
+		(pin "2"
+			(uuid "79d50528-082d-4acb-8bcd-ae3937cbe90c")
+		)
+		(instances
+			(project "IN13-Nixie-Device"
+				(path "/36cde5b7-6663-4cfe-a0a3-3f17918aab11"
+					(reference "C1")
 					(unit 1)
 				)
 			)
