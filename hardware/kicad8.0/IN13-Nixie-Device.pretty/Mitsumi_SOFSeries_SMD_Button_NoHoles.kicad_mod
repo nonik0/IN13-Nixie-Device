@@ -1,0 +1,135 @@
+(footprint "Mitsumi_SOFSeries_SMD_Button_NoHoles"
+	(version 20240108)
+	(generator "pcbnew")
+	(generator_version "8.0")
+	(layer "F.Cu")
+	(property "Reference" "SW1"
+		(at 0 -9.15 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(hide yes)
+		(uuid "94528fb1-7bd6-465b-ba10-7dde8026e8d6")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+		)
+	)
+	(property "Value" "SW_Push"
+		(at 0.000001 8.350001 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "6e8bea05-5df7-4b78-895b-54ae14a34d11")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Footprint" "IN13-Nixie-Device:Mitsumi_SOFSeries_SMD_Button"
+		(at 0 7.35 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "b52be371-6738-482e-b42c-d46645698452")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 7.35 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "ceb7c0a8-a917-43eb-b224-9a44ecc1269e")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" "Single Pole Single Throw (SPST) switch"
+		(at 0 7.35 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "30cb6ba4-b56a-499d-bbab-d0164ae5a179")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_poly
+		(pts
+			(xy -2.2 -1.9) (xy 2.199999 -1.900001) (xy 2.2 1.2) (xy -2.2 1.2)
+		)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(fill none)
+		(layer "F.CrtYd")
+		(uuid "59163b94-ec0a-4874-b64b-bfcf3764e223")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0.000001 9.849998 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "1836b0ee-3e0d-4e7d-8ee3-93ace1a1b1ff")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "1" smd roundrect
+		(at -1.675001 0.599999)
+		(size 0.55 0.8)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(roundrect_rratio 0.25)
+		(thermal_bridge_angle 45)
+		(uuid "0d5cf7f5-567e-4616-b8fe-58239a5a0ae6")
+	)
+	(pad "2" smd roundrect
+		(at 0 -1.475)
+		(size 0.9 0.55)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(roundrect_rratio 0.25)
+		(thermal_bridge_angle 45)
+		(uuid "40c14296-0aa9-409a-8fa5-515324883bf4")
+	)
+	(pad "2" smd roundrect
+		(at 1.675001 -0.599999)
+		(size 0.55 0.8)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(roundrect_rratio 0.25)
+		(thermal_bridge_angle 45)
+		(uuid "e9f9a851-049f-4a90-b87a-4fc4a7cd688e")
+	)
+	(pad "2" smd roundrect
+		(at 1.675001 0.599998)
+		(size 0.55 0.8)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(roundrect_rratio 0.25)
+		(thermal_bridge_angle 45)
+		(uuid "7ed5f705-6228-4111-bf74-a7acf1fd88e7")
+	)
+	(pad "3" smd roundrect
+		(at -1.675001 -0.599998)
+		(size 0.55 0.8)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(roundrect_rratio 0.25)
+		(thermal_bridge_angle 45)
+		(uuid "dac60d0d-9792-4f7b-a19e-8619dd6ce742")
+	)
+)
